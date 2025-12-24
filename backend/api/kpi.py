@@ -4,7 +4,7 @@ from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
-from backend.db import get_db
+from backend.db import  get_async_session
 
 router = APIRouter()
 
@@ -13,7 +13,7 @@ router = APIRouter()
 # /kpi/overview
 # -----------------------
 @router.get("/overview")
-async def kpi_overview(db: AsyncSession = Depends(get_db)):
+async def kpi_overview(db: AsyncSession = Depends( get_async_session)):
     KPI_OVERVIEW_SQL = text("""
     WITH total_rev AS (
       SELECT SUM(oi.quantity * oi.unit_price) AS total_revenue
@@ -125,7 +125,7 @@ async def products_by_category(
     max_price: Optional[float] = Query(None, ge=0.0),
     limit: int = Query(50, ge=1, le=500),
     offset: int = Query(0, ge=0),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends( get_async_session)
 ):
     """
     Returns basic product stats for the given categories: product_id, name, price, units_sold, revenue.
@@ -193,7 +193,7 @@ async def revenue_trend(
     months: int = Query(12, ge=1, le=60),
     start_date: Optional[str] = Query(None, description="YYYY-MM-DD"),
     end_date: Optional[str] = Query(None, description="YYYY-MM-DD"),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends( get_async_session)
 ):
     try:
                 # start/end override (daily buckets)
@@ -285,7 +285,7 @@ async def revenue_trend(
 async def top_products(
     limit: int = Query(20, ge=1, le=200),
     sort_by: str = Query("units", regex="^(units|revenue)$"),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends( get_async_session)
 ):
     try:
         order_clause = "total_units_sold" if sort_by == "units" else "total_revenue"
@@ -323,7 +323,7 @@ async def top_products(
 @router.get("/customer-insights")
 async def customer_insights(
     top_n: int = Query(20, ge=1, le=200),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends( get_async_session)
 ):
     try:
         top_sql = text("""
@@ -394,7 +394,7 @@ async def customer_insights(
 async def recent_reviews(
     limit: int = Query(50, ge=1, le=500),
     min_rating: int = Query(0, ge=0, le=5),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends( get_async_session)
 ):
     """
     Returns recent reviews filtered by minimum rating (default 0 = all).
@@ -461,7 +461,7 @@ async def recent_reviews(
 # /kpi/categories
 # -----------------------
 @router.get("/categories")
-async def list_categories(db: AsyncSession = Depends(get_db)):
+async def list_categories(db: AsyncSession = Depends( get_async_session)):
     """
     Return distinct product categories (string) from ecom.products
     """
@@ -484,7 +484,7 @@ async def list_categories(db: AsyncSession = Depends(get_db)):
 @router.get("/revenue-by-category")
 async def revenue_by_category(
     months: int = Query(6, ge=1, le=60),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends( get_async_session)
 ):
     """
     Returns aggregated revenue per category for the past `months` months.
@@ -517,7 +517,7 @@ async def top_products(
     limit: int = Query(20, ge=1, le=200),
     sort_by: str = Query("units", regex="^(units|revenue)$"),
     category: Optional[str] = Query(None, description="Filter by category"),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends( get_async_session)
 ):
     """
     Top products optionally filtered by category.
@@ -575,7 +575,7 @@ async def top_products(
 # /kpi/products-list
 # -----------------------
 @router.get("/products-list")
-async def products_list(limit: int = Query(1000, ge=1, le=5000), db: AsyncSession = Depends(get_db)):
+async def products_list(limit: int = Query(1000, ge=1, le=5000), db: AsyncSession = Depends( get_async_session)):
     """
     Return simple product listing (id, name) used by UI dropdowns.
     """
@@ -598,7 +598,7 @@ async def recommendations(
     product_id: int = Query(..., description="Product ID to get recommendations for"),
     limit: int = Query(10, ge=1, le=50),
     method: str = Query("co-purchase", regex="^(co-purchase|category)$"),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends( get_async_session)
 ):
     """
     Returns recommended products for a given product_id.
