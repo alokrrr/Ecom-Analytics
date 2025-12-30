@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import text
 
-from backend.db import get_async_session
+from backend.db import get_db   # ✅ FIXED
 
 router = APIRouter()
 
@@ -21,7 +21,7 @@ async def anomalies_health():
 @router.get("/anomalies/revenue")
 async def revenue_anomalies(
     threshold: float = 2.0,
-    db: AsyncSession = Depends(get_async_session),
+    db: AsyncSession = Depends(get_db),   # ✅ FIXED
 ):
     """
     Detect revenue anomalies using simple z-score method.
