@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.db import get_async_session
+from backend.db import get_db   # ✅ FIXED
 
 router = APIRouter()
 
@@ -15,7 +15,7 @@ router = APIRouter()
 # /kpi/overview
 # -----------------------
 @router.get("/overview")
-async def kpi_overview(db: AsyncSession = Depends(get_async_session)):
+async def kpi_overview(db: AsyncSession = Depends(get_db)):
     try:
         sql = text("""
         WITH total_rev AS (
@@ -63,7 +63,7 @@ async def kpi_overview(db: AsyncSession = Depends(get_async_session)):
 # /kpi/categories
 # -----------------------
 @router.get("/categories")
-async def list_categories(db: AsyncSession = Depends(get_async_session)):
+async def list_categories(db: AsyncSession = Depends(get_db)):
     try:
         sql = text("""
             SELECT DISTINCT COALESCE(category, 'Uncategorized')
@@ -82,7 +82,7 @@ async def list_categories(db: AsyncSession = Depends(get_async_session)):
 @router.get("/revenue-trend")
 async def revenue_trend(
     months: int = Query(12, ge=1, le=60),
-    db: AsyncSession = Depends(get_async_session)
+    db: AsyncSession = Depends(get_db)
 ):
     try:
         sql = text(f"""
@@ -107,7 +107,7 @@ async def revenue_trend(
 @router.get("/top-products")
 async def top_products(
     limit: int = Query(20, ge=1, le=200),
-    db: AsyncSession = Depends(get_async_session)
+    db: AsyncSession = Depends(get_db)
 ):
     try:
         sql = text("""
@@ -143,7 +143,7 @@ async def top_products(
 @router.get("/products-list")
 async def products_list(
     limit: int = Query(1000, ge=1, le=5000),
-    db: AsyncSession = Depends(get_async_session)
+    db: AsyncSession = Depends(get_db)
 ):
     try:
         sql = text("""
@@ -165,7 +165,7 @@ async def products_list(
 async def recommendations(
     product_id: int,
     limit: int = Query(10, ge=1, le=50),
-    db: AsyncSession = Depends(get_async_session)
+    db: AsyncSession = Depends(get_db)
 ):
     try:
         sql = text("""
